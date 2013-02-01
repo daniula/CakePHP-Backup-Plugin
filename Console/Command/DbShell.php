@@ -7,6 +7,16 @@ define('DUMP_PATH', dirname(dirname(dirname(__FILE__))).DS.'tmp'.DS );
 class DbShell extends AppShell {
   private $changes = array();
 
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    $parser->addOption('branch', array(
+      'help' => 'Define which branch should be used to push new database dump.',
+      'short' => 'b',
+      'default' => 'master',
+    ));
+    return $parser;
+  }
+
   public function main() {
     $db = ConnectionManager::getDataSource('default');
 
@@ -26,6 +36,22 @@ class DbShell extends AppShell {
         exec($cmd);
       }
     }
+    $cmd = array(
+      sprintf('cd %s', DUMP_PATH),
+      sprintf('git checkout %s', $this->params['branch']),
+      sprintf('git add .'),
+      sprintf('git commit -m"%s"', date(DateTime::W3C)),
+      sprintf('git push origin %s', $this->params['branch']),
+    );
+
+    $this->out('');
+    // $this->out(join(' && ', $cmd));
+
+    exec(join(' && ', $cmd), $output, $error);
+    if ($error) {
+      $this->err(join("\n", $output));
+    }
+
   }
 
   private function hasChanges($model) {
