@@ -45,7 +45,6 @@ class DbShell extends AppShell {
     );
 
     $this->out('');
-    // $this->out(join(' && ', $cmd));
 
     exec(join(' && ', $cmd), $output, $error);
     if ($error) {
