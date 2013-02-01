@@ -50,7 +50,6 @@ class DbShell extends AppShell {
     if ($error) {
       $this->err(join("\n", $output));
     }
-
   }
 
   private function hasChanges($model) {
