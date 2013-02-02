@@ -36,6 +36,8 @@ class DbShell extends AppShell {
         exec($cmd);
       }
     }
+    $this->saveChanges();
+
     $cmd = array(
       sprintf('cd %s', DUMP_PATH),
       sprintf('git checkout %s', $this->params['branch']),
