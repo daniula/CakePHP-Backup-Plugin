@@ -56,10 +56,11 @@ class DbShell extends AppShell {
 
   private function hasChanges($model) {
     $schema = $model->schema();
+    $result = false;
 
     if (!empty($schema['updated'])) {
       $fields = array('MAX(updated) AS lastUpdate');
-      $lastUpdate = Set::extract($model->find('first', compact('fields')), '0.lastUpdate');
+      $lastUpdate = strtotime(Set::extract($model->find('first', compact('fields')), '0.lastUpdate'));
       $result = $this->checkChanges($lastUpdate, $model->alias);
     } else {
       $count = $model->find('count');
@@ -76,7 +77,7 @@ class DbShell extends AppShell {
       $this->changes = $cache;
     }
 
-    if (empty($this->changes[$modelName]) || $this->changes[$modelName] < $value) {
+    if (!isset($this->changes[$modelName]) || $this->changes[$modelName] < $value) {
       $this->changes[$modelName] = $value;
       $result = true;
     }
