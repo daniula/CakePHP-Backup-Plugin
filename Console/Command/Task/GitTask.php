@@ -28,8 +28,8 @@ class GitTask extends Shell {
   public function pull($path, $branch) {
     $cmd = array(
       sprintf('cd %s', $path),
-      sprintf('git pull origin %s', $branch),
       sprintf('git checkout %s', $branch),
+      sprintf('git pull origin %s', $branch),
     );
 
     return $this->exec($cmd);
