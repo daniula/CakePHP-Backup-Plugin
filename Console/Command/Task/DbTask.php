@@ -22,6 +22,51 @@ class DbTask extends Shell {
 
   }
 
+  public function restoreAll($path, $truncate = true) {
+    $result = true;
+
+    $tables = $this->getParams('db')->listSources();
+
+    foreach ($tables as $table) {
+      if (!$this->restore($table, $path, $truncate)) {
+        return false;
+      }
+    }
+
+    return $result;
+  }
+
+  public function restore($table, $path, $truncate = true) {
+    $modelName = Inflector::singularize(ucfirst($table));
+    $this->loadModel($modelName);
+
+    if ($truncate) {
+      $query = sprintf('TRUNCATE %s;', $table);
+      $this->out($query);
+      $this->{$modelName}->query($query);
+    }
+
+    $f = new File($path.$table.'.sql');
+    $sql = explode("\n", $f->read());
+
+    $successCount = $failCount = 0;
+
+    $beforeCount = $this->{$modelName}->find('count');
+    $this->out(sprintf('%s has %d records', $table, $beforeCount));
+
+    $sqlCount = 0;
+    foreach ($sql as $i => $insert) {
+      if (preg_match('/^INSERT INTO/', $insert)) {
+        $sqlCount++;
+        $this->{$modelName}->query($insert);
+      }
+    }
+
+    $afterCount = $this->{$modelName}->find('count');
+    $this->out(sprintf('Restored %d after %d quries in %s table.', ($afterCount - $beforeCount), $sqlCount, $table));
+    return ( ($afterCount - $beforeCount) == $sqlCount );
+  }
+
   public function dumpAll($path, $force = false) {
     $result = null;
 
@@ -41,7 +86,6 @@ class DbTask extends Shell {
     if (!$force) {
       $this->saveChanges();
     }
-
 
     return $result;
   }
