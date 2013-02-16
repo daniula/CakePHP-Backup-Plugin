@@ -1,2 +1,5 @@
-tmp/*
-!tmp/.gitkeep
+!tmp/dump/*
+!tmp/dump/.gitkeep
+
+!tmp/pull/*
+!tmp/pull/.gitkeep
